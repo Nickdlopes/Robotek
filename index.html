@@ -757,7 +757,7 @@ footer {
     display: none; 
     flex-direction: column; 
     position: fixed; 
-    top: 65px; left: 0; right: 0; 
+    top: 100%; left: 0; right: 0; 
     background: rgba(245,239,228,0.98); 
     padding: 2rem 1.5rem; 
     gap: 1.5rem; 
@@ -903,49 +903,79 @@ footer {
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3A5A2E" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="4"/><line x1="3" y1="3" x2="8" y2="8"/><line x1="21" y1="3" x2="16" y2="8"/></svg>
         <span>Foto · Fábrica / ESP32</span>
       </div>
-      <div class="esp-panel">
-        <div class="panel-header">
-          <span class="panel-title">ESP32 · Monitor de Lote</span>
-          <span class="panel-status">
-            <span class="pulse-dot" style="display:inline-block;width:5px;height:5px;background:#7AAB5E;border-radius:50%;animation:breathe 2s infinite;"></span>
-            Ao vivo
-          </span>
-        </div>
-        <div class="sensor-row">
-          <span class="sensor-name">Temperatura</span>
-          <div class="sensor-right">
-            <span class="sensor-val">18.4°C</span>
-            <div class="bar-wrap"><div class="bar-fill" style="width:64%"></div></div>
-          </div>
-        </div>
-        <div class="sensor-row">
-          <span class="sensor-name">pH</span>
-          <div class="sensor-right">
-            <span class="sensor-val">4.2</span>
-            <div class="bar-wrap"><div class="bar-fill" style="width:52%; animation-delay:0.5s;"></div></div>
-          </div>
-        </div>
-        <div class="sensor-row">
-          <span class="sensor-name">Densidade</span>
-          <div class="sensor-right">
-            <span class="sensor-val">1.048 SG</span>
-            <div class="bar-wrap"><div class="bar-fill" style="width:78%; animation-delay:1s;"></div></div>
-          </div>
-        </div>
-        <div class="sensor-row">
-          <span class="sensor-name">CO₂</span>
-          <div class="sensor-right">
-            <span class="sensor-val">2.6 vol</span>
-            <div class="bar-wrap"><div class="bar-fill" style="width:88%; animation-delay:1.5s;"></div></div>
-          </div>
-        </div>
-        <div class="term">
-          <span class="tline">&gt; <span class="tgreen">ROBOTEK</span> firmware v2.4.1</span>
-          <span class="tline">&gt; Lote: verde_protocol_007</span>
-          <span class="tline">&gt; Adj. PID: +0.02 · Relé #2 ON</span>
-          <span class="tline">&gt; Prox. leitura: 28s <span class="tcursor"></span></span>
+
+    <div class="esp-panel">
+      <div class="panel-header">
+        <span class="panel-title">ESP32 · Monitor em Tempo Real</span>
+        <span class="panel-status" id="live-status-header">
+          <span class="pulse-dot"></span>
+          Conectando...
+        </span>
+      </div>
+      
+      <div class="sensor-row">
+        <span class="sensor-name">Temperatura Atual</span>
+        <div class="sensor-right">
+          <span class="sensor-val" id="live-temp">--.-°C</span>
+          <div class="bar-wrap"><div class="bar-fill" id="bar-temp" style="width: 0%"></div></div>
         </div>
       </div>
+
+      <div class="sensor-row">
+        <span class="sensor-name">Setpoint (Alvo)</span>
+        <div class="sensor-right">
+          <span class="sensor-val" id="live-setpoint" style="color: var(--muted);">--.-°C</span>
+          <div class="bar-wrap"><div class="bar-fill" id="bar-setpoint" style="width: 0%; background: var(--muted);"></div></div>
+        </div>
+      </div>
+
+      <div class="term">
+        <span class="tline">&gt; <span class="tgreen">ROBOTEK</span> OS v2.4.1</span>
+        <span class="tline" id="term-sys-status">&gt; Aguardando telemetria...</span>
+        <span class="tline" id="term-pid">&gt; PID: Standby</span>
+        <span class="tline">&gt; Link de dados ativo <span class="tcursor"></span></span>
+      </div>
+    </div>
+  
+  <div class="sensor-row">
+    <span class="sensor-name">Temperatura</span>
+    <div class="sensor-right">
+      <span class="sensor-val" id="live-temp">--.-°C</span>
+      <div class="bar-wrap"><div class="bar-fill" id="bar-temp" style="width: 0%"></div></div>
+    </div>
+  </div>
+
+  <div class="sensor-row">
+    <span class="sensor-name">pH</span>
+    <div class="sensor-right">
+      <span class="sensor-val" id="live-ph">--.-</span>
+      <div class="bar-wrap"><div class="bar-fill" id="bar-ph" style="width: 0%; animation-delay:0.5s;"></div></div>
+    </div>
+  </div>
+
+  <div class="sensor-row">
+    <span class="sensor-name">Densidade</span>
+    <div class="sensor-right">
+      <span class="sensor-val" id="live-density">-.--- SG</span>
+      <div class="bar-wrap"><div class="bar-fill" id="bar-density" style="width: 0%; animation-delay:1s;"></div></div>
+    </div>
+  </div>
+
+  <div class="sensor-row">
+    <span class="sensor-name">CO₂</span>
+    <div class="sensor-right">
+      <span class="sensor-val" id="live-co2">-.-- vol</span>
+      <div class="bar-wrap"><div class="bar-fill" id="bar-co2" style="width: 0%; animation-delay:1.5s;"></div></div>
+    </div>
+  </div>
+
+  <div class="term">
+    <span class="tline">&gt; <span class="tgreen">ROBOTEK</span> firmware v2.4.1</span>
+    <span class="tline" id="term-sys-status">&gt; Aguardando telemetria...</span>
+    <span class="tline" id="term-pid">&gt; PID: Idle</span>
+    <span class="tline">&gt; Monitor público ativo <span class="tcursor"></span></span>
+  </div>
+</div>
     </div>
   </div>
 </section>
@@ -1009,7 +1039,54 @@ footer {
   <div class="footer-copy">© 2026 Robotek Cervejaria Autônoma · São Paulo, SP</div>
   <div class="footer-fw">Firmware v2.4.1 · Sistema Online</div>
 </footer>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+  const firebaseConfig = {
+    apiKey: "AIzaSyAfgkNc7LNpmyJTFD9q1LeuiIqThMhCq1k",
+    databaseURL: "https://robotek-senac-default-rtdb.firebaseio.com",
+    projectId: "robotek-senac"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  onValue(ref(db, 'robotek/'), (snapshot) => {
+    const data = snapshot.val();
+    if (!data) return;
+
+    // Atualização dos Valores de Texto
+    document.getElementById('live-temp').innerText = data.telemetria.temp_atual + "°C";
+    // Nota: Como o pH e Densidade podem não estar no Firebase ainda, usamos valores fixos ou do DB
+    document.getElementById('live-ph').innerText = "4.2"; // Exemplo estático ou data.telemetria.ph
+    document.getElementById('live-density').innerText = "1.048 SG";
+    document.getElementById('live-co2').innerText = "2.6 vol";
+
+    // Atualização das Barras de Progresso
+    document.getElementById('bar-temp').style.width = Math.min(100, (data.telemetria.temp_atual / 100) * 100) + "%";
+    document.getElementById('bar-ph').style.width = "42%"; 
+    document.getElementById('bar-density').style.width = "78%";
+    document.getElementById('bar-co2').style.width = "88%";
+
+    // Atualização do Status e Terminal
+    const statusHeader = document.getElementById('live-status-header');
+    const termStatus = document.getElementById('term-sys-status');
+    const termPID = document.getElementById('term-pid');
+
+    if (data.controle.status_sistema) {
+      statusHeader.innerHTML = '<span class="pulse-dot"></span> Ao Vivo';
+      statusHeader.style.color = "var(--leaf2)";
+      termStatus.innerHTML = '&gt; Sistema: <span class="tgreen">OPERACIONAL</span>';
+      termPID.innerText = `> PID Target: ${data.controle.setpoint}°C`;
+    } else {
+      statusHeader.innerHTML = '<span class="pulse-dot" style="background:var(--danger); animation:none;"></span> Standby';
+      statusHeader.style.color = "var(--muted)";
+      termStatus.innerHTML = '&gt; Sistema: <span style="color:var(--danger)">PAUSADO</span>';
+      termPID.innerText = "> PID: Idle";
+    }
+  });
+</script>
 <script>
 // 3D tilt on beer card
 const card = document.getElementById('beerCard');
