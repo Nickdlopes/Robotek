@@ -240,15 +240,21 @@
       h1 span { display: block; margin-left: 0; margin-top: 5px; }
       #status-btn { width: 100%; text-align: center; }
     }
+
+    a {
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
 
   <header>
+    <a href="./index.html">
     <h1 class="header-logo">
       <span class="logo-dot"></span>
       ROBOTEK <span>| Controle de Temperatura</span>
     </h1>
+    </a>
     <button id="status-btn" class="badge-off" onclick="toggleSystem()">CARREGANDO...</button>
   </header>
 
