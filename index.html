@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Robotek — Cervejaria Autônoma</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --moss:    #3A5A2E;
+  --moss2:   #4E7A40;
+  --moss3:   #2A4220;
+  --leaf:    #7AAB5E;
+  --leaf2:   #A8C88C;
+  --earth:   #6B4A2A;
+  --earth2:  #8C6240;
+  --sand:    #C4A882;
+  --sand2:   #DEC9A8;
+  --cream:   #F5EFE4;
+  --cream2:  #EDE3D4;
+  --ink:     #1A1F14;
+  --ink2:    #2C3422;
+  --text:    #3A3328;
+  --muted:   #7A7060;
+  --border:  rgba(58,90,46,0.18);
+  --borderE: rgba(107,74,42,0.15);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* NAV */
+nav {
+  position: fixed; top: 0; width: 100%; z-index: 1000;
+  padding: 1.1rem 3.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(245,239,228,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.4s;
+}
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--moss3);
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.logo-dot {
+  width: 8px; height: 8px;
+  background: var(--leaf);
+  border-radius: 50%;
+  animation: breathe 3s ease infinite;
+}
+@keyframes breathe {
+  0%,100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.5); opacity: 0.6; }
+}
+.nav-links { display: flex; gap: 2.5rem; list-style: none; }
+.nav-links a {
+  color: var(--muted);
+  text-decoration: none;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: color 0.3s;
+}
+.nav-links a:hover { color: var(--moss); }
+.nav-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.55rem 1.3rem;
+  background: var(--moss);
+  color: var(--cream);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.3s;
+  border-radius: 2px;
+}
+.nav-btn:hover { background: var(--moss3); }
+
+/* HERO */
+#hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding-top: 80px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-bg-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(58,90,46,0.055) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+.hero-left {
+  padding: 6rem 3.5rem 6rem 4.5rem;
+  position: relative;
+  z-index: 2;
+}
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 2rem;
+}
+.eyebrow-line {
+  width: 40px; height: 1px;
+  background: var(--leaf);
+}
+.eyebrow-text {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--moss2);
+}
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3.2rem, 6vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1.0;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+.hero-title em {
+  font-style: italic;
+  color: var(--moss);
+}
+.hero-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--earth);
+  margin-bottom: 1.8rem;
+  margin-top: 0.8rem;
+}
+.hero-desc {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--muted);
+  max-width: 420px;
+  margin-bottom: 2.5rem;
+}
+.hero-desc strong { color: var(--moss); font-weight: 700; }
+.hero-cta-group { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.btn-filled {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.9rem 2rem;
+  background: var(--moss);
+  color: var(--cream);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: background 0.3s, transform 0.2s;
+  display: inline-block;
+}
+.btn-filled:hover { background: var(--moss3); transform: translateY(-2px); }
+.btn-ghost {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.9rem 2rem;
+  background: transparent;
+  color: var(--earth);
+  border: 1.5px solid var(--borderE);
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: all 0.3s;
+  display: inline-block;
+}
+.btn-ghost:hover { border-color: var(--earth); background: rgba(107,74,42,0.06); transform: translateY(-2px); }
+
+/* Hero right — beer hero card */
+.hero-right {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink2);
+  overflow: hidden;
+}
+.hero-right-bg {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 30% 70%, rgba(122,171,94,0.12), transparent 60%),
+                    radial-gradient(circle at 80% 20%, rgba(107,74,42,0.1), transparent 50%);
+}
+.hero-right-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(122,171,94,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(122,171,94,0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.beer-hero-card {
+  position: relative;
+  z-index: 2;
+  width: 320px;
+  transform-style: preserve-3d;
+  transition: transform 0.08s ease;
+}
+.beer-hero-inner {
+  background: rgba(26,31,20,0.85);
+  border: 1px solid rgba(122,171,94,0.25);
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+.beer-hero-top {
+  background: var(--moss3);
+  padding: 2rem 2rem 1.5rem;
+  border-bottom: 1px solid rgba(122,171,94,0.2);
+  position: relative;
+  overflow: hidden;
+}
+.beer-hero-top::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 100px; height: 100px;
+  border: 1px solid rgba(122,171,94,0.15);
+  border-radius: 50%;
+}
+.beer-hero-top::after {
+  content: '';
+  position: absolute;
+  bottom: -50px; left: -20px;
+  width: 120px; height: 120px;
+  border: 1px solid rgba(122,171,94,0.08);
+  border-radius: 50%;
+}
+.beer-label-type {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--leaf2);
+  margin-bottom: 0.7rem;
+  position: relative;
+  z-index: 1;
+}
+.beer-label-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: var(--cream);
+  line-height: 0.95;
+  position: relative;
+  z-index: 1;
+}
+.beer-label-name em {
+  font-style: italic;
+  color: var(--leaf2);
+  display: block;
+  font-size: 1.5rem;
+}
+.beer-hero-body {
+  padding: 1.5rem 2rem;
+}
+.beer-deco-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+.deco-line { flex: 1; height: 1px; background: rgba(122,171,94,0.15); }
+.deco-dot { width: 4px; height: 4px; background: var(--leaf); border-radius: 50%; }
+.beer-hero-desc {
+  font-size: 0.82rem;
+  line-height: 1.75;
+  color: rgba(196,168,130,0.8);
+  margin-bottom: 1.4rem;
+}
+.beer-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+  border: 1px solid rgba(122,171,94,0.12);
+}
+.bstat {
+  text-align: center;
+  padding: 0.9rem 0.5rem;
+  border-right: 1px solid rgba(122,171,94,0.12);
+}
+.bstat:last-child { border-right: none; }
+.bstat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--leaf2);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+.bstat-lbl {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.45rem;
+  letter-spacing: 0.2em;
+  color: rgba(196,168,130,0.5);
+  text-transform: uppercase;
+}
+.beer-batch-tag {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.batch-left {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.15em;
+  color: rgba(122,171,94,0.5);
+  text-transform: uppercase;
+}
+.batch-pulse {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.5rem;
+  color: rgba(122,171,94,0.7);
+  letter-spacing: 0.1em;
+}
+.pulse-dot {
+  width: 5px; height: 5px;
+  background: var(--leaf);
+  border-radius: 50%;
+  animation: breathe 2s ease infinite;
+}
+
+/* Floating chip labels around card */
+.chip-float {
+  position: absolute;
+  background: rgba(26,31,20,0.9);
+  border: 1px solid rgba(122,171,94,0.2);
+  padding: 0.5rem 0.8rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--leaf2);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  animation: floatChip 4s ease infinite;
+}
+.chip1 { top: 15%; left: -120px; animation-delay: 0s; }
+.chip2 { top: 40%; right: -130px; animation-delay: 1s; }
+.chip3 { bottom: 20%; left: -110px; animation-delay: 2s; }
+@keyframes floatChip {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+/* ABOUT */
+#about {
+  background: var(--cream2);
+  padding: 8rem 4.5rem;
+  position: relative;
+}
+#about::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--leaf), transparent);
+}
+.about-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 6rem;
+  align-items: center;
+}
+.section-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+.section-eyebrow span {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--earth);
+}
+.section-eyebrow::before {
+  content: '';
+  display: block;
+  width: 28px; height: 1px;
+  background: var(--earth);
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+}
+.section-title em { font-style: italic; color: var(--moss); }
+.about-body p {
+  color: var(--muted);
+  font-size: 0.97rem;
+  line-height: 1.8;
+  margin-bottom: 1.3rem;
+}
+.about-body strong { color: var(--moss); font-weight: 700; }
+
+/* ESP32 live panel */
+.esp-panel {
+  background: var(--ink2);
+  border: 1px solid rgba(122,171,94,0.2);
+  padding: 1.8rem;
+  position: relative;
+  overflow: hidden;
+}
+.esp-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--moss), var(--leaf), transparent);
+}
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.4rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(122,171,94,0.12);
+}
+.panel-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--leaf2);
+}
+.panel-status {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.5rem;
+  color: rgba(122,171,94,0.7);
+  letter-spacing: 0.1em;
+}
+.sensor-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid rgba(122,171,94,0.07);
+}
+.sensor-row:last-of-type { border-bottom: none; }
+.sensor-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(196,168,130,0.5);
+}
+.sensor-right { display: flex; align-items: center; gap: 0.8rem; }
+.sensor-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--leaf2);
+}
+.bar-wrap { width: 60px; height: 2px; background: rgba(122,171,94,0.1); border-radius: 2px; }
+.bar-fill {
+  height: 2px;
+  background: var(--leaf);
+  border-radius: 2px;
+  animation: barPulse 4s ease-in-out infinite;
+}
+@keyframes barPulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+.term {
+  margin-top: 1.2rem;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(122,171,94,0.1);
+  padding: 0.9rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  line-height: 2;
+  color: rgba(122,171,94,0.7);
+}
+.tline { display: block; opacity: 0; animation: fadein 0.4s forwards; }
+.tline:nth-child(1) { animation-delay: 0.3s; }
+.tline:nth-child(2) { animation-delay: 0.9s; }
+.tline:nth-child(3) { animation-delay: 1.5s; }
+.tline:nth-child(4) { animation-delay: 2.1s; }
+@keyframes fadein { to { opacity: 1; } }
+.tgreen { color: var(--leaf); }
+.tcursor {
+  display: inline-block;
+  width: 5px; height: 9px;
+  background: var(--leaf);
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+}
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* PROJECT CTA */
+#project {
+  background: var(--ink);
+  padding: 7rem 4.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.project-bg-lines {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(122,171,94,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(122,171,94,0.04) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: slideGrid 15s linear infinite;
+}
+@keyframes slideGrid {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 50px; }
+}
+.project-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+.project-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--leaf);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.project-tag::before { content:''; display:block; width:28px; height:1px; background:var(--leaf); }
+.project-headline {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 700;
+  color: var(--cream);
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+}
+.project-headline em { font-style: italic; color: var(--leaf2); }
+.project-body {
+  color: rgba(196,168,130,0.7);
+  font-size: 1rem;
+  line-height: 1.8;
+  max-width: 600px;
+  margin-bottom: 3rem;
+}
+.project-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1px;
+  background: rgba(122,171,94,0.08);
+  border: 1px solid rgba(122,171,94,0.1);
+  margin-bottom: 3rem;
+}
+.pfeature {
+  background: rgba(26,31,20,0.6);
+  padding: 1.5rem;
+  transition: background 0.3s;
+}
+.pfeature:hover { background: rgba(42,66,32,0.5); }
+.pfeature-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--leaf);
+  letter-spacing: 0.15em;
+  margin-bottom: 0.6rem;
+}
+.pfeature-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--cream2);
+  margin-bottom: 0.4rem;
+}
+.pfeature-desc {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  line-height: 1.7;
+  color: rgba(196,168,130,0.5);
+}
+.project-cta-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.btn-filled-light {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 1rem 2.2rem;
+  background: var(--leaf);
+  color: var(--ink);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: all 0.3s;
+  font-weight: 500;
+  display: inline-block;
+}
+.btn-filled-light:hover { background: var(--leaf2); transform: translateY(-2px); }
+.btn-ghost-light {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 1rem 2.2rem;
+  background: transparent;
+  color: rgba(196,168,130,0.7);
+  border: 1px solid rgba(122,171,94,0.2);
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: all 0.3s;
+  display: inline-block;
+}
+.btn-ghost-light:hover { border-color: var(--leaf); color: var(--leaf); transform: translateY(-2px); }
+
+/* FOOTER */
+footer {
+  background: var(--ink2);
+  border-top: 1px solid rgba(122,171,94,0.1);
+  padding: 2rem 4.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.footer-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--leaf2);
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.footer-copy {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.5rem;
+  color: rgba(122,171,94,0.35);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.footer-fw {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.5rem;
+  color: rgba(122,171,94,0.3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Image placeholders */
+.img-placeholder {
+  background: var(--cream2);
+  border: 2px dashed rgba(58,90,46,0.22);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+}
+.img-placeholder-dark {
+  background: rgba(42,66,32,0.35);
+  border: 2px dashed rgba(122,171,94,0.22);
+  color: rgba(196,168,130,0.5);
+}
+.img-placeholder svg { opacity: 0.35; }
+.img-placeholder span { opacity: 0.6; }
+
+/* Reveal animations */
+.reveal {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity 0.85s cubic-bezier(0.16,1,0.3,1), transform 0.85s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal.in { opacity: 1; transform: translateY(0); }
+.reveal-d1 { transition-delay: 0.1s; }
+.reveal-d2 { transition-delay: 0.2s; }
+.reveal-d3 { transition-delay: 0.3s; }
+.reveal-d4 { transition-delay: 0.4s; }
+
+/* Hamburger */
+.hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:4px; }
+.hamburger span { display:block; width:22px; height:1px; background:var(--moss); transition:all 0.3s; }
+
+/* Responsive */
+@media (max-width: 991px) {
+  #hero { grid-template-columns: 1fr; }
+  .hero-right { height: 60vw; min-height: 360px; }
+  .hero-left { padding: 5rem 1.5rem 3rem; }
+  .chip-float { display: none; }
+  .about-wrap { grid-template-columns: 1fr; gap: 3rem; }
+  #about, #project { padding: 5rem 1.5rem; }
+  nav { padding: 1rem 1.5rem; }
+  .nav-links, .nav-btn { display: none; }
+  .hamburger { display: flex; }
+  footer { padding: 1.5rem; }
+}
+@media (max-width: 576px) {
+  .hero-right { height: 80vw; }
+  .beer-hero-card { width: 260px; }
+  .project-features { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a class="nav-logo" href="#hero">
+    <span class="logo-dot"></span>
+    ROBOTEK
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">Sobre</a></li>
+    <li><a href="#project">Projeto</a></li>
+    <li><a href="#about">Cervejas</a></li>
+  </ul>
+  <a class="nav-btn" href="#project">Conhecer o Projeto</a>
+  <div class="hamburger" id="ham"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-pattern"></div>
+
+  <!-- LEFT -->
+  <div class="hero-left">
+    <div class="hero-eyebrow">
+      <div class="eyebrow-line"></div>
+      <span class="eyebrow-text">Cervejaria Autônoma · ESP32</span>
+    </div>
+    <h1 class="hero-title">
+      Cerveja<br>
+      <em>artesanal,</em><br>
+      mente<br>
+      de máquina.
+    </h1>
+    <p class="hero-sub">Robotek · Fundada em 2024</p>
+    <p class="hero-desc">
+      Na Robotek, cada lote é supervisionado por um sistema de automação com <strong>ESP32</strong> — sensores, controle de temperatura e registros em tempo real. O resultado é uma cerveja que respeita a tradição e abraça a tecnologia.
+    </p>
+    <div class="hero-cta-group">
+      <a href="#project" class="btn-filled">Conhecer o Projeto</a>
+      <a href="#about" class="btn-ghost">Nossa Cerveja</a>
+    </div>
+  </div>
+
+  <!-- RIGHT — beer hero -->
+  <div class="hero-right">
+    <div class="hero-right-bg"></div>
+    <div class="hero-right-grid"></div>
+
+    <!-- Floating chips -->
+    <div class="chip-float chip1"><span class="pulse-dot" style="display:inline-block;width:4px;height:4px;background:#7AAB5E;border-radius:50%;margin-right:5px;animation:breathe 2s infinite;"></span>Temp: 18.4°C</div>
+    <div class="chip-float chip2">pH: 4.2 · Estável</div>
+    <div class="chip-float chip3">Lote #007 · Ativo</div>
+
+    <!-- PLACEHOLDER: imagem do rótulo / garrafa da cerveja -->
+    <div class="img-placeholder img-placeholder-dark" style="position:absolute;top:1.5rem;right:1.5rem;width:90px;height:90px;border-radius:50%;z-index:3;" title="Substituir pela logo ou foto do rótulo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7AAB5E" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="4"/><line x1="3" y1="3" x2="8" y2="8"/><line x1="21" y1="3" x2="16" y2="8"/></svg>
+      <span style="font-size:0.42rem;text-align:center;line-height:1.4;">Logo /<br>Rótulo</span>
+    </div>
+
+    <div class="beer-hero-card" id="beerCard">
+      <div class="beer-hero-inner">
+        <div class="beer-hero-top">
+          <div class="beer-label-type">Robotek · IPA Artesanal</div>
+          <div class="beer-label-name">
+            Verde
+            <em>Protocol</em>
+          </div>
+        </div>
+        <div class="beer-hero-body">
+          <div class="beer-deco-divider">
+            <div class="deco-line"></div>
+            <div class="deco-dot"></div>
+            <div class="deco-line"></div>
+          </div>
+          <p class="beer-hero-desc">
+            Uma IPA de amargor preciso com notas cítricas e herbais, fermentada a ±0.1°C pelo nosso sistema ESP32. Cada lote: um algoritmo diferente, um sabor idêntico.
+          </p>
+          <div class="beer-stats-grid">
+            <div class="bstat">
+              <span class="bstat-val">6.8%</span>
+              <span class="bstat-lbl">ABV</span>
+            </div>
+            <div class="bstat">
+              <span class="bstat-val">54</span>
+              <span class="bstat-lbl">IBU</span>
+            </div>
+            <div class="bstat">
+              <span class="bstat-val">7.2</span>
+              <span class="bstat-lbl">SRM</span>
+            </div>
+          </div>
+          <div class="beer-batch-tag">
+            <span class="batch-left">Lote #001 · 2025-4</span>
+            <span class="batch-pulse">
+              <span class="pulse-dot"></span>
+              Fermentando
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-wrap">
+    <div class="about-body reveal">
+      <div class="section-eyebrow"><span>Nossa história</span></div>
+      <h2 class="section-title">
+        Onde o lúpulo<br>
+        encontra o <em>código</em>
+      </h2>
+      <p>
+        A <strong>Robotek</strong> nasceu de uma obsessão dupla: produzir a cerveja artesanal mais consistente possível e usar tecnologia de ponta para isso. Desenvolvemos nosso próprio sistema de automação com <strong>ESP32</strong> para monitorar e controlar cada variável do processo.
+      </p>
+      <p>
+        Temperatura, pH, densidade e pressão de CO₂ são lidos a cada 30 segundos. Um algoritmo PID ajusta resistências e resfriamento em tempo real. Os dados ficam disponíveis via Wi-Fi num dashboard simples e acessível.
+      </p>
+      <p>
+        O resultado? Uma cerveja artesanal com a alma do campo e a precisão de um laboratório. <strong>Verde Protocol</strong> é o nosso primeiro rótulo — e o projeto que queremos compartilhar com o mundo.
+      </p>
+      <a href="#project" class="btn-filled" style="margin-top: 1.2rem; display: inline-block;">Ver o Projeto</a>
+    </div>
+
+    <div class="reveal reveal-d2">
+      <!-- PLACEHOLDER: foto da fábrica / equipamentos ESP32 -->
+      <div class="img-placeholder" style="width:100%;height:220px;margin-bottom:1.5rem;border-radius:4px;" title="Substituir pela foto da fábrica ou do hardware ESP32">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3A5A2E" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="4"/><line x1="3" y1="3" x2="8" y2="8"/><line x1="21" y1="3" x2="16" y2="8"/></svg>
+        <span>Foto · Fábrica / ESP32</span>
+      </div>
+      <div class="esp-panel">
+        <div class="panel-header">
+          <span class="panel-title">ESP32 · Monitor de Lote</span>
+          <span class="panel-status">
+            <span class="pulse-dot" style="display:inline-block;width:5px;height:5px;background:#7AAB5E;border-radius:50%;animation:breathe 2s infinite;"></span>
+            Ao vivo
+          </span>
+        </div>
+        <div class="sensor-row">
+          <span class="sensor-name">Temperatura</span>
+          <div class="sensor-right">
+            <span class="sensor-val">18.4°C</span>
+            <div class="bar-wrap"><div class="bar-fill" style="width:64%"></div></div>
+          </div>
+        </div>
+        <div class="sensor-row">
+          <span class="sensor-name">pH</span>
+          <div class="sensor-right">
+            <span class="sensor-val">4.2</span>
+            <div class="bar-wrap"><div class="bar-fill" style="width:52%; animation-delay:0.5s;"></div></div>
+          </div>
+        </div>
+        <div class="sensor-row">
+          <span class="sensor-name">Densidade</span>
+          <div class="sensor-right">
+            <span class="sensor-val">1.048 SG</span>
+            <div class="bar-wrap"><div class="bar-fill" style="width:78%; animation-delay:1s;"></div></div>
+          </div>
+        </div>
+        <div class="sensor-row">
+          <span class="sensor-name">CO₂</span>
+          <div class="sensor-right">
+            <span class="sensor-val">2.6 vol</span>
+            <div class="bar-wrap"><div class="bar-fill" style="width:88%; animation-delay:1.5s;"></div></div>
+          </div>
+        </div>
+        <div class="term">
+          <span class="tline">&gt; <span class="tgreen">ROBOTEK</span> firmware v2.4.1</span>
+          <span class="tline">&gt; Lote: verde_protocol_007</span>
+          <span class="tline">&gt; Adj. PID: +0.02 · Relé #2 ON</span>
+          <span class="tline">&gt; Prox. leitura: 28s <span class="tcursor"></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECT CTA -->
+<section id="project">
+  <div class="project-bg-lines"></div>
+  <div class="project-inner">
+    <div class="project-tag">O Projeto</div>
+    <h2 class="project-headline reveal">
+      Automação<br>
+      <em>artesanal</em><br>
+      open source.
+    </h2>
+    <p class="project-body reveal reveal-d1">
+      Queremos que qualquer pessoa possa reproduzir nosso sistema em casa. Todo o código do firmware ESP32, esquemas elétricos e receitas de cerveja estão documentados e serão disponibilizados publicamente. Cerveja boa é para todos.
+    </p>
+    <div class="project-features reveal reveal-d2">
+      <div class="pfeature">
+        <div class="pfeature-num">01</div>
+        <div class="pfeature-title">Firmware ESP32</div>
+        <div class="pfeature-desc">Controle PID, leitura de sensores, dashboard Wi-Fi e log em SD card.</div>
+      </div>
+      <div class="pfeature">
+        <div class="pfeature-num">02</div>
+        <div class="pfeature-title">Hardware Aberto</div>
+        <div class="pfeature-desc">Esquemas de circuito e lista de componentes para montar você mesmo.</div>
+      </div>
+      <div class="pfeature">
+        <div class="pfeature-num">03</div>
+        <div class="pfeature-title">Receitas Documentadas</div>
+        <div class="pfeature-desc">Cada lote com parâmetros completos, gráficos de fermentação e notas.</div>
+      </div>
+      <div class="pfeature">
+        <div class="pfeature-num">04</div>
+        <div class="pfeature-title">Comunidade</div>
+        <div class="pfeature-desc">Discord e GitHub para troca de receitas, código e experiências.</div>
+      </div>
+    </div>
+    <!-- PLACEHOLDERS: galeria de fotos do processo / produto -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2.5rem;" class="reveal reveal-d2">
+      <div class="img-placeholder img-placeholder-dark" style="height:150px;border-radius:4px;" title="Substituir pela foto do processo de fabricação">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7AAB5E" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="4"/><line x1="3" y1="3" x2="8" y2="8"/><line x1="21" y1="3" x2="16" y2="8"/></svg>
+        <span>Foto · Processo</span>
+      </div>
+      <div class="img-placeholder img-placeholder-dark" style="height:150px;border-radius:4px;" title="Substituir pela foto do circuito / hardware">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7AAB5E" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="4"/><line x1="3" y1="3" x2="8" y2="8"/><line x1="21" y1="3" x2="16" y2="8"/></svg>
+        <span>Foto · Hardware</span>
+      </div>
+      <div class="img-placeholder img-placeholder-dark" style="height:150px;border-radius:4px;" title="Substituir pela foto do produto final / garrafa">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7AAB5E" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="4"/><line x1="3" y1="3" x2="8" y2="8"/><line x1="21" y1="3" x2="16" y2="8"/></svg>
+        <span>Foto · Produto</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <span class="logo-dot" style="width:6px;height:6px;"></span>
+    ROBOTEK
+  </div>
+  <div class="footer-copy">© 2026 Robotek Cervejaria Autônoma · São Paulo, SP</div>
+  <div class="footer-fw">Firmware v2.4.1 · Sistema Online</div>
+</footer>
+
+<script>
+// 3D tilt on beer card
+const card = document.getElementById('beerCard');
+const cardWrap = card.parentElement;
+cardWrap.addEventListener('mousemove', e => {
+  const r = cardWrap.getBoundingClientRect();
+  const x = e.clientX - r.left - r.width/2;
+  const y = e.clientY - r.top  - r.height/2;
+  card.style.transform = `rotateY(${x/r.width*16}deg) rotateX(${-y/r.height*12}deg) translateZ(15px)`;
+});
+cardWrap.addEventListener('mouseleave', () => {
+  card.style.transform = '';
+  card.style.transition = 'transform 0.6s ease';
+  setTimeout(() => card.style.transition = '', 600);
+});
+
+// Scroll reveal
+const obs = new IntersectionObserver(es => {
+  es.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// Nav bg
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('navbar');
+  nav.style.background = window.scrollY > 60
+    ? 'rgba(245,239,228,0.98)'
+    : 'rgba(245,239,228,0.92)';
+});
+
+// Hamburger
+document.getElementById('ham').addEventListener('click', () => {
+  const links = document.querySelector('.nav-links');
+  const isOpen = links.style.display === 'flex';
+  if (!isOpen) {
+    links.style.cssText = 'display:flex;flex-direction:column;position:fixed;top:65px;left:0;right:0;background:rgba(245,239,228,0.98);padding:2rem 1.5rem;gap:1.5rem;border-bottom:1px solid rgba(58,90,46,0.18);z-index:999;';
+  } else {
+    links.style.display = 'none';
+  }
+});
+document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => {
+  document.querySelector('.nav-links').style.display = 'none';
+}));
+
+// Sensor bar jitter
+document.querySelectorAll('.bar-fill').forEach(bar => {
+  const base = parseFloat(bar.style.width);
+  setInterval(() => {
+    const v = base + (Math.random() - 0.5) * 14;
+    bar.style.width = Math.max(10, Math.min(96, v)).toFixed(0) + '%';
+    bar.style.transition = 'width 2.5s ease';
+  }, 3200);
+});
+
+</script>
+</body>
+</html>
