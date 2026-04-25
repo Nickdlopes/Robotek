@@ -924,8 +924,8 @@ footer {
       <div class="sensor-row">
         <span class="sensor-name">Setpoint (Alvo)</span>
         <div class="sensor-right">
-          <span class="sensor-val" id="live-setpoint" style="color: var(--muted);">--.-°C</span>
-          <div class="bar-wrap"><div class="bar-fill" id="bar-setpoint" style="width: 0%; background: var(--muted);"></div></div>
+          <span class="sensor-val" id="live-setpoint" style="color: #c2a884;">--.-°C</span>
+          <div class="bar-wrap"><div class="bar-fill" id="bar-setpoint" style="width: 0%; background: #c2a884"></div></div>
         </div>
       </div>
 
@@ -937,44 +937,7 @@ footer {
       </div>
     </div>
   
-  <div class="sensor-row">
-    <span class="sensor-name">Temperatura</span>
-    <div class="sensor-right">
-      <span class="sensor-val" id="live-temp">--.-°C</span>
-      <div class="bar-wrap"><div class="bar-fill" id="bar-temp" style="width: 0%"></div></div>
-    </div>
-  </div>
 
-  <div class="sensor-row">
-    <span class="sensor-name">pH</span>
-    <div class="sensor-right">
-      <span class="sensor-val" id="live-ph">--.-</span>
-      <div class="bar-wrap"><div class="bar-fill" id="bar-ph" style="width: 0%; animation-delay:0.5s;"></div></div>
-    </div>
-  </div>
-
-  <div class="sensor-row">
-    <span class="sensor-name">Densidade</span>
-    <div class="sensor-right">
-      <span class="sensor-val" id="live-density">-.--- SG</span>
-      <div class="bar-wrap"><div class="bar-fill" id="bar-density" style="width: 0%; animation-delay:1s;"></div></div>
-    </div>
-  </div>
-
-  <div class="sensor-row">
-    <span class="sensor-name">CO₂</span>
-    <div class="sensor-right">
-      <span class="sensor-val" id="live-co2">-.-- vol</span>
-      <div class="bar-wrap"><div class="bar-fill" id="bar-co2" style="width: 0%; animation-delay:1.5s;"></div></div>
-    </div>
-  </div>
-
-  <div class="term">
-    <span class="tline">&gt; <span class="tgreen">ROBOTEK</span> firmware v2.4.1</span>
-    <span class="tline" id="term-sys-status">&gt; Aguardando telemetria...</span>
-    <span class="tline" id="term-pid">&gt; PID: Idle</span>
-    <span class="tline">&gt; Monitor público ativo <span class="tcursor"></span></span>
-  </div>
 </div>
     </div>
   </div>
@@ -1056,20 +1019,15 @@ footer {
     const data = snapshot.val();
     if (!data) return;
 
-    // Atualização dos Valores de Texto
+    // 1. Atualização dos Valores Numéricos (IDs corrigidos)
     document.getElementById('live-temp').innerText = data.telemetria.temp_atual + "°C";
-    // Nota: Como o pH e Densidade podem não estar no Firebase ainda, usamos valores fixos ou do DB
-    document.getElementById('live-ph').innerText = "4.2"; // Exemplo estático ou data.telemetria.ph
-    document.getElementById('live-density').innerText = "1.048 SG";
-    document.getElementById('live-co2').innerText = "2.6 vol";
+    document.getElementById('live-setpoint').innerText = data.controle.setpoint + "°C";
 
-    // Atualização das Barras de Progresso
-    document.getElementById('bar-temp').style.width = Math.min(100, (data.telemetria.temp_atual / 100) * 100) + "%";
-    document.getElementById('bar-ph').style.width = "42%"; 
-    document.getElementById('bar-density').style.width = "78%";
-    document.getElementById('bar-co2').style.width = "88%";
+    // 2. Atualização das Barras de Progresso (Calculado sobre 100°C)
+    document.getElementById('bar-temp').style.width = Math.min(100, data.telemetria.temp_atual) + "%";
+    document.getElementById('bar-setpoint').style.width = Math.min(100, data.controle.setpoint) + "%";
 
-    // Atualização do Status e Terminal
+    // 3. Atualização do Status e Terminal
     const statusHeader = document.getElementById('live-status-header');
     const termStatus = document.getElementById('term-sys-status');
     const termPID = document.getElementById('term-pid');
@@ -1077,7 +1035,7 @@ footer {
     if (data.controle.status_sistema) {
       statusHeader.innerHTML = '<span class="pulse-dot"></span> Ao Vivo';
       statusHeader.style.color = "var(--leaf2)";
-      termStatus.innerHTML = '&gt; Sistema: <span class="tgreen">OPERACIONAL</span>';
+      termStatus.innerHTML = '&gt; Sistema: <span class="tgreen">AQUECIMENTO ATIVO</span>';
       termPID.innerText = `> PID Target: ${data.controle.setpoint}°C`;
     } else {
       statusHeader.innerHTML = '<span class="pulse-dot" style="background:var(--danger); animation:none;"></span> Standby';

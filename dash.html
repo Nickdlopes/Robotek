@@ -155,7 +155,7 @@
       border-bottom: 2px dashed rgba(168,200,140,0.4);
       transition: all 0.2s ease;
       margin: 0;
-      outline: none; /* Remove a borda azul padrão do navegador ao focar */
+      outline: none;
     }
     .timer-editable:focus, .timer-editable:hover { 
       color: #fff !important; 
@@ -276,10 +276,10 @@
       </div>
 
       <div class="slider-container" style="gap: 8px;">
-        <button class="btn-adjust reset-btn" onclick="adjustTimer(-60)" title="Retirar 1 minuto">-1m</button>
-        <button class="btn-adjust" id="btn-timer-toggle" onclick="toggleTimer()" title="Iniciar/Pausar">▶</button>
-        <button class="btn-adjust reset-btn" onclick="resetTimer()" title="Zerar Cronômetro">Reset</button>
-        <button class="btn-adjust reset-btn" onclick="adjustTimer(60)" title="Adicionar 1 minuto">+1m</button>
+        <button class="btn-adjust reset-btn" onclick="adjustTimerFirebase(-60000)" title="Retirar 1 minuto">-1m</button>
+        <button class="btn-adjust" id="btn-timer-toggle" onclick="toggleTimerFirebase()" title="Iniciar/Pausar">▶</button>
+        <button class="btn-adjust reset-btn" onclick="resetTimerFirebase()" title="Zerar Cronômetro">Reset</button>
+        <button class="btn-adjust reset-btn" onclick="adjustTimerFirebase(60000)" title="Adicionar 1 minuto">+1m</button>
       </div>
     </div>
   </div>
@@ -312,33 +312,113 @@
     const db = getDatabase(app);
 
     let systemIsOn = false; 
-
-    // --- LÓGICA DO CRONÔMETRO LOCAL ---
-    let timerInterval = null;
-    let timeRemaining = 0; 
-    let isTimerRunning = false;
     let hasReachedSetpoint = false; 
-    const timerDisplay = document.getElementById('timer-display');
 
-    function updateTimerDisplay() {
-      // Só atualiza o texto se não estivermos a editar manualmente
-      if (document.activeElement !== timerDisplay) {
-        let m = Math.floor(timeRemaining / 60);
-        let s = timeRemaining % 60;
-        timerDisplay.innerText = 
-          String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    // --- NOVA LÓGICA DO CRONÔMETRO (NUVEM / GLOBAL) ---
+    // Em vez de contar localmente, lemos o "Target" do Firebase.
+    let globalTimerRunning = false;
+    let globalTimerTarget = 0; 
+    let localRemainingMs = 0; // Quantidade de tempo (em milissegundos) que falta
+    let visualUpdateInterval = null;
+    const timerDisplay = document.getElementById('timer-display');
+    const btnToggle = document.getElementById('btn-timer-toggle');
+
+    function formatTime(ms) {
+      if (ms < 0) ms = 0;
+      let totalSeconds = Math.floor(ms / 1000);
+      let m = Math.floor(totalSeconds / 60);
+      let s = totalSeconds % 60;
+      return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+
+    function renderTimerVisuals() {
+      // Se não está rodando, calculamos com base no que está guardado
+      if (!globalTimerRunning) {
+        if (document.activeElement !== timerDisplay) {
+          timerDisplay.innerText = formatTime(globalTimerTarget); // Se pausado, o "Target" atua como um cofre de tempo
+        }
+        timerDisplay.style.color = 'var(--leaf2)';
+        timerDisplay.classList.remove('running');
+        btnToggle.innerText = '▶';
+        timerDisplay.contentEditable = "false";
+      } else {
+        // Se está rodando, calculamos a diferença entre o Agora e o Alvo no futuro
+        let now = Date.now();
+        localRemainingMs = globalTimerTarget - now;
+        
+        if (localRemainingMs > 0) {
+          timerDisplay.innerText = formatTime(localRemainingMs);
+          timerDisplay.style.color = 'var(--leaf2)';
+          timerDisplay.classList.add('running');
+          btnToggle.innerText = '⏸';
+          timerDisplay.contentEditable = "false";
+        } else {
+          // Fim do tempo
+          timerDisplay.innerText = "00:00";
+          timerDisplay.style.color = 'var(--danger)';
+          timerDisplay.classList.remove('running');
+          btnToggle.innerText = '▶';
+          
+          // Notifica o Firebase que o timer acabou para sincronizar os ecrãs
+          if (globalTimerRunning) {
+             update(ref(db, 'robotek/controle'), { timer_running: false, timer_target: 0 });
+          }
+        }
       }
     }
 
-    // --- MÁSCARA DE EDIÇÃO INLINE DO CRONÔMETRO ---
+    // O loop visual apenas desenha o que está no Firebase na tela
+    if (!visualUpdateInterval) {
+      visualUpdateInterval = setInterval(() => {
+        if (globalTimerRunning) renderTimerVisuals();
+      }, 500); // Atualiza a cada meio segundo para não "pular" números
+    }
+
+    // --- FUNÇÕES DE ESCRITA NO FIREBASE (AÇÕES DO USUÁRIO) ---
     
-    // 1. Torna editável ao clicar (se não estiver rodando)
+    // Iniciar ou Pausar envia o comando para a nuvem
+    window.toggleTimerFirebase = () => {
+      if (globalTimerTarget === 0 && !globalTimerRunning) return; // Não inicia zerado
+
+      if (!globalTimerRunning) {
+        // Estava pausado. Vamos iniciar!
+        // Criamos um novo alvo no futuro: Agora + Tempo que estava guardado
+        let newTarget = Date.now() + globalTimerTarget;
+        update(ref(db, 'robotek/controle'), { timer_running: true, timer_target: newTarget });
+      } else {
+        // Estava rodando. Vamos pausar!
+        // Guardamos o que sobrou de volta no Target para funcionar como "cofre"
+        let timeLeft = globalTimerTarget - Date.now();
+        if (timeLeft < 0) timeLeft = 0;
+        update(ref(db, 'robotek/controle'), { timer_running: false, timer_target: timeLeft });
+      }
+    };
+
+    window.adjustTimerFirebase = (msToAddOrRemove) => {
+      if (!globalTimerRunning) {
+        // Se pausado, ajusta diretamente o valor guardado
+        let novoTempo = globalTimerTarget + msToAddOrRemove;
+        if (novoTempo < 0) novoTempo = 0;
+        update(ref(db, 'robotek/controle'), { timer_target: novoTempo });
+      } else {
+        // Se rodando, empurra o Alvo mais para o futuro ou puxa para o presente
+        let novoTarget = globalTimerTarget + msToAddOrRemove;
+        // Não deixa empurrar para o passado a ponto de ficar negativo em relação ao momento atual
+        if (novoTarget < Date.now()) novoTarget = Date.now();
+        update(ref(db, 'robotek/controle'), { timer_target: novoTarget });
+      }
+    };
+
+    window.resetTimerFirebase = () => {
+      hasReachedSetpoint = false; 
+      update(ref(db, 'robotek/controle'), { timer_running: false, timer_target: 0 });
+    };
+
+    // --- MÁSCARA DE EDIÇÃO INLINE (Adaptada para MS) ---
     timerDisplay.addEventListener('click', function() {
-      if (!isTimerRunning) {
+      if (!globalTimerRunning) {
         this.contentEditable = "true";
         this.focus();
-        
-        // Coloca o cursor no final do texto
         let range = document.createRange();
         let sel = window.getSelection();
         range.selectNodeContents(this);
@@ -348,42 +428,28 @@
       }
     });
 
-    // 2. Intercepta a digitação para aplicar a máscara (MM:SS)
     timerDisplay.addEventListener('keydown', function(e) {
-      // Permite navegação básica e apagar
       if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key)) {
         if (e.key === 'Enter') {
           e.preventDefault();
-          this.blur(); // Salva ao apertar Enter
+          this.blur();
         }
         return;
       }
       
-      // Bloqueia teclas não numéricas
-      if (!/^[0-9]$/.test(e.key)) {
-        e.preventDefault();
-        return;
-      }
+      if (!/^[0-9]$/.test(e.key)) { e.preventDefault(); return; }
 
-      e.preventDefault(); // Impede o navegador de inserir a tecla diretamente
-
-      // Lógica de "empurrar" os números (Máscara de Micro-ondas)
-      let currentText = this.innerText.replace(':', ''); // Pega apenas os números (ex: "0000")
-      currentText += e.key; // Adiciona o número digitado no final
+      e.preventDefault();
+      let currentText = this.innerText.replace(':', ''); 
+      currentText += e.key; 
       
-      // Pega os últimos 4 dígitos
-      if (currentText.length > 4) {
-        currentText = currentText.slice(-4); 
-      } else {
-        currentText = currentText.padStart(4, '0'); // Garante que tem 4 dígitos
-      }
+      if (currentText.length > 4) currentText = currentText.slice(-4); 
+      else currentText = currentText.padStart(4, '0'); 
 
-      // Separa minutos e segundos e atualiza o display temporário
       let m = currentText.slice(0, 2);
       let s = currentText.slice(2, 4);
       this.innerText = m + ':' + s;
 
-      // Mantém o cursor no final
       let range = document.createRange();
       let sel = window.getSelection();
       range.selectNodeContents(this);
@@ -392,82 +458,21 @@
       sel.addRange(range);
     });
 
-    // 3. Salva a edição quando sai do campo (Blur)
     timerDisplay.addEventListener('blur', function() {
       this.contentEditable = "false";
-      
-      // Lê o que está na tela
       let parts = this.innerText.split(':');
       if (parts.length === 2) {
         let m = parseInt(parts[0]) || 0;
         let s = parseInt(parts[1]) || 0;
+        let totalMs = ((m * 60) + s) * 1000;
         
-        // Se segundos for maior que 59, converte corretamente (ex: 1:90 vira 2:30)
-        timeRemaining = (m * 60) + s;
+        hasReachedSetpoint = false; 
+        // Salva a edição na nuvem
+        update(ref(db, 'robotek/controle'), { timer_target: totalMs });
       }
-      
-      hasReachedSetpoint = false; // Rearma o auto-start
-      this.style.color = 'var(--leaf2)';
-      updateTimerDisplay(); // Força a formatação limpa (MM:SS correto)
     });
 
-    // Previne colar texto maluco no timer
     timerDisplay.addEventListener('paste', (e) => e.preventDefault());
-
-
-    window.adjustTimer = (seconds) => {
-      timeRemaining += seconds;
-      if (timeRemaining < 0) timeRemaining = 0;
-      document.getElementById('timer-display').style.color = 'var(--leaf2)'; 
-      updateTimerDisplay();
-      if (!isTimerRunning) { hasReachedSetpoint = false; }
-    };
-
-    window.toggleTimer = () => {
-      const btn = document.getElementById('btn-timer-toggle');
-
-      if (timeRemaining === 0 && !isTimerRunning) return; 
-
-      isTimerRunning = !isTimerRunning;
-
-      if (isTimerRunning) {
-        btn.innerText = '⏸';
-        timerDisplay.style.color = 'var(--leaf2)';
-        timerDisplay.classList.add('running'); 
-        timerDisplay.contentEditable = "false"; // Trava edição
-
-        timerInterval = setInterval(() => {
-          if (timeRemaining > 0) {
-            timeRemaining--;
-            updateTimerDisplay();
-          } else {
-            isTimerRunning = false;
-            btn.innerText = '▶';
-            clearInterval(timerInterval);
-            timerDisplay.style.color = 'var(--danger)';
-            timerDisplay.classList.remove('running');
-          }
-        }, 1000);
-      } else {
-        btn.innerText = '▶';
-        clearInterval(timerInterval);
-        timerDisplay.classList.remove('running'); 
-      }
-    };
-
-    window.resetTimer = () => {
-      isTimerRunning = false;
-      hasReachedSetpoint = false; 
-      clearInterval(timerInterval);
-      
-      document.getElementById('btn-timer-toggle').innerText = '▶';
-      timerDisplay.style.color = 'var(--leaf2)';
-      timerDisplay.classList.remove('running');
-      timerDisplay.contentEditable = "false";
-      
-      timeRemaining = 0;
-      updateTimerDisplay();
-    };
 
     // --- CONFIGURAÇÃO DO GRÁFICO (CHART.JS) ---
     const ctx = document.getElementById('tempChart').getContext('2d');
@@ -508,6 +513,7 @@
     window.zoomChartOut = () => { tempChart.zoom(0.9); };
     window.resetChartZoom = () => { tempChart.resetZoom(); };
 
+    // --- LEITURA DO FIREBASE (TEMPO REAL) ---
     onValue(ref(db, 'robotek/'), (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
@@ -521,20 +527,25 @@
       statusBtn.innerText = systemIsOn ? "SISTEMA ON" : "SISTEMA OFF";
       statusBtn.className = systemIsOn ? "badge-on" : "badge-off";
 
-      // Gatilho do cronômetro (Margem de ±5°C)
-      if (systemIsOn && timeRemaining > 0 && !isTimerRunning) {
+      // Sincronização do Estado do Cronômetro vindo da Nuvem
+      globalTimerRunning = data.controle.timer_running || false;
+      globalTimerTarget = data.controle.timer_target || 0;
+      
+      // Força a atualização visual imediatamente após ler do Firebase
+      if (!globalTimerRunning) renderTimerVisuals();
+
+      // Gatilho Automático (Administrador é o responsável por disparar para a nuvem)
+      if (systemIsOn && globalTimerTarget > 0 && !globalTimerRunning) {
         if (Math.abs(data.telemetria.temp_atual - data.controle.setpoint) <= 5) {
           if (!hasReachedSetpoint) {
             hasReachedSetpoint = true; 
-            toggleTimer(); 
+            window.toggleTimerFirebase(); // O admin manda o comando "Play" para a nuvem
           }
         }
       }
-      
-      if (!systemIsOn) {
-        hasReachedSetpoint = false;
-      }
+      if (!systemIsOn) hasReachedSetpoint = false;
 
+      // Gráfico
       const time = new Date().toLocaleTimeString();
       tempChart.data.labels.push(time);
       tempChart.data.datasets[0].data.push(data.telemetria.temp_atual);
