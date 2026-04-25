@@ -24,6 +24,7 @@
   --muted:   #7A7060;
   --border:  rgba(58,90,46,0.18);
   --borderE: rgba(107,74,42,0.15);
+  --danger:  #A84C32;
 }
 
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -434,7 +435,7 @@ nav {
 }
 .about-body strong { color: var(--moss); font-weight: 700; }
 
-/* ESP32 live panel */
+/* ESP32 live panel (GUEST) */
 .esp-panel {
   background: var(--ink2);
   border: 1px solid rgba(122,171,94,0.2);
@@ -470,6 +471,7 @@ nav {
   font-size: 0.5rem;
   color: rgba(122,171,94,0.7);
   letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 .sensor-row {
   display: flex;
@@ -498,11 +500,7 @@ nav {
   height: 2px;
   background: var(--leaf);
   border-radius: 2px;
-  animation: barPulse 4s ease-in-out infinite;
-}
-@keyframes barPulse {
-  0%,100% { opacity: 1; }
-  50%      { opacity: 0.5; }
+  transition: width 0.5s ease;
 }
 .term {
   margin-top: 1.2rem;
@@ -515,10 +513,10 @@ nav {
   color: rgba(122,171,94,0.7);
 }
 .tline { display: block; opacity: 0; animation: fadein 0.4s forwards; }
-.tline:nth-child(1) { animation-delay: 0.3s; }
-.tline:nth-child(2) { animation-delay: 0.9s; }
-.tline:nth-child(3) { animation-delay: 1.5s; }
-.tline:nth-child(4) { animation-delay: 2.1s; }
+.tline:nth-child(1) { animation-delay: 0.1s; }
+.tline:nth-child(2) { animation-delay: 0.3s; }
+.tline:nth-child(3) { animation-delay: 0.5s; }
+.tline:nth-child(4) { animation-delay: 0.7s; }
 @keyframes fadein { to { opacity: 1; } }
 .tgreen { color: var(--leaf); }
 .tcursor {
@@ -618,45 +616,6 @@ nav {
   line-height: 1.7;
   color: rgba(196,168,130,0.5);
 }
-.project-cta-row {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.btn-filled-light {
-  font-family: 'DM Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  padding: 1rem 2.2rem;
-  background: var(--leaf);
-  color: var(--ink);
-  border: none;
-  cursor: pointer;
-  text-decoration: none;
-  border-radius: 2px;
-  transition: all 0.3s;
-  font-weight: 500;
-  display: inline-block;
-}
-.btn-filled-light:hover { background: var(--leaf2); transform: translateY(-2px); }
-.btn-ghost-light {
-  font-family: 'DM Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  padding: 1rem 2.2rem;
-  background: transparent;
-  color: rgba(196,168,130,0.7);
-  border: 1px solid rgba(122,171,94,0.2);
-  cursor: pointer;
-  text-decoration: none;
-  border-radius: 2px;
-  transition: all 0.3s;
-  display: inline-block;
-}
-.btn-ghost-light:hover { border-color: var(--leaf); color: var(--leaf); transform: translateY(-2px); }
 
 /* FOOTER */
 footer {
@@ -728,8 +687,6 @@ footer {
 .reveal.in { opacity: 1; transform: translateY(0); }
 .reveal-d1 { transition-delay: 0.1s; }
 .reveal-d2 { transition-delay: 0.2s; }
-.reveal-d3 { transition-delay: 0.3s; }
-.reveal-d4 { transition-delay: 0.4s; }
 
 /* Hamburger */
 .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:4px; }
@@ -740,7 +697,6 @@ footer {
 ------------------------------------------- */
 @media (max-width: 991px) {
   #hero { grid-template-columns: 1fr; }
-  /* Removemos a altura fixa (vw) para evitar que o cartão seja cortado */
   .hero-right { height: auto; min-height: 500px; padding: 4rem 1.5rem; }
   .hero-left { padding: 7rem 1.5rem 4rem; }
   
@@ -752,7 +708,6 @@ footer {
   .nav-btn { display: none; }
   .hamburger { display: flex; }
   
-  /* Lógica CSS limpa para o menu mobile, substituindo a injeção via JS */
   .nav-links { 
     display: none; 
     flex-direction: column; 
@@ -764,22 +719,16 @@ footer {
     border-bottom: 1px solid var(--border); 
     z-index: 999; 
   }
-  .nav-links.active { display: flex; }
+  .nav-links.active { display: flex; top: 65px; }
   
   footer { flex-direction: column; text-align: center; gap: 1.5rem; }
 }
 
 @media (max-width: 576px) {
-  /* Ajuste de fontes para evitar quebra de layout em telas muito estreitas */
   .hero-title { font-size: clamp(2.5rem, 10vw, 3.2rem); }
   .beer-label-name { font-size: 2.2rem; }
-  
-  /* Permite que o cartão ocupe a largura disponível, mantendo um limite agradável */
   .beer-hero-card { width: 100%; max-width: 300px; }
-  
   .project-features { grid-template-columns: 1fr; }
-  
-  /* Botões empilhados para melhor área de toque (UX) no celular */
   .hero-cta-group { flex-direction: column; align-items: stretch; }
   .btn-filled, .btn-ghost { text-align: center; }
 }
@@ -866,7 +815,7 @@ footer {
             </div>
           </div>
           <div class="beer-batch-tag">
-            <span class="batch-left">Lote #001 · 2025-4</span>
+            <span class="batch-left">Lote #001 · 2026</span>
             <span class="batch-pulse">
               <span class="pulse-dot"></span>
               Fermentando
@@ -904,42 +853,47 @@ footer {
         <span>Foto · Fábrica / ESP32</span>
       </div>
 
-    <div class="esp-panel">
-      <div class="panel-header">
-        <span class="panel-title">ESP32 · Monitor em Tempo Real</span>
-        <span class="panel-status" id="live-status-header">
-          <span class="pulse-dot"></span>
-          Conectando...
-        </span>
-      </div>
-      
-      <div class="sensor-row">
-        <span class="sensor-name">Temperatura Atual</span>
-        <div class="sensor-right">
-          <span class="sensor-val" id="live-temp">--.-°C</span>
-          <div class="bar-wrap"><div class="bar-fill" id="bar-temp" style="width: 0%"></div></div>
+      <div class="esp-panel">
+        <div class="panel-header">
+          <span class="panel-title">ESP32 · Monitor em Tempo Real</span>
+          <span class="panel-status" id="live-status-header">
+            <span class="pulse-dot"></span>
+            Conectando...
+          </span>
+        </div>
+        
+        <div class="sensor-row">
+          <span class="sensor-name">Temperatura Atual</span>
+          <div class="sensor-right">
+            <span class="sensor-val" id="live-temp">--.-°C</span>
+            <div class="bar-wrap"><div class="bar-fill" id="bar-temp" style="width: 0%"></div></div>
+          </div>
+        </div>
+
+        <div class="sensor-row">
+          <span class="sensor-name">Setpoint (Alvo)</span>
+          <div class="sensor-right">
+            <span class="sensor-val" id="live-setpoint" style="color: #c2a884;">--.-°C</span>
+            <div class="bar-wrap"><div class="bar-fill" id="bar-setpoint" style="width: 0%; background: #c2a884"></div></div>
+          </div>
+        </div>
+
+        <div class="sensor-row">
+          <span class="sensor-name">Tempo Restante</span>
+          <div class="sensor-right">
+            <span class="sensor-val" id="live-timer-guest" style="color: var(--muted);">00:00</span>
+          </div>
+        </div>
+
+        <div class="term">
+          <span class="tline">&gt; <span class="tgreen">ROBOTEK</span> OS v2.4.1</span>
+          <span class="tline" id="term-sys-status">&gt; Aguardando telemetria...</span>
+          <span class="tline" id="term-pid">&gt; PID: Standby</span>
+          <span class="tline" id="term-timer">&gt; Cronômetro: Aguardando</span>
+          <span class="tline">&gt; Monitor público ativo <span class="tcursor"></span></span>
         </div>
       </div>
-
-      <div class="sensor-row">
-        <span class="sensor-name">Setpoint (Alvo)</span>
-        <div class="sensor-right">
-          <span class="sensor-val" id="live-setpoint" style="color: #c2a884;">--.-°C</span>
-          <div class="bar-wrap"><div class="bar-fill" id="bar-setpoint" style="width: 0%; background: #c2a884"></div></div>
-        </div>
       </div>
-
-      <div class="term">
-        <span class="tline">&gt; <span class="tgreen">ROBOTEK</span> OS v2.4.1</span>
-        <span class="tline" id="term-sys-status">&gt; Aguardando telemetria...</span>
-        <span class="tline" id="term-pid">&gt; PID: Standby</span>
-        <span class="tline">&gt; Link de dados ativo <span class="tcursor"></span></span>
-      </div>
-    </div>
-  
-
-</div>
-    </div>
   </div>
 </section>
 
@@ -1002,6 +956,7 @@ footer {
   <div class="footer-copy">© 2026 Robotek Cervejaria Autônoma · São Paulo, SP</div>
   <div class="footer-fw">Firmware v2.4.1 · Sistema Online</div>
 </footer>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -1015,90 +970,137 @@ footer {
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
+  // Variáveis para a Sincronização do Tempo
+  let globalTimerRunning = false;
+  let globalTimerTarget = 0;
+  
+  // Referências do HTML
+  const timerDisplayGuest = document.getElementById('live-timer-guest');
+  const termTimer = document.getElementById('term-timer');
+
+  // Formatador de milissegundos para MM:SS
+  function formatTime(ms) {
+    if (ms < 0) ms = 0;
+    let totalSeconds = Math.floor(ms / 1000);
+    let m = Math.floor(totalSeconds / 60);
+    let s = totalSeconds % 60;
+    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  }
+
+  // Loop independente para atualizar o relógio visual do visitante
+  setInterval(() => {
+    if (globalTimerRunning) {
+      let now = Date.now();
+      let timeLeft = globalTimerTarget - now;
+
+      if (timeLeft > 0) {
+        if (timerDisplayGuest) {
+            timerDisplayGuest.innerText = formatTime(timeLeft);
+            timerDisplayGuest.style.color = "var(--leaf2)";
+        }
+        if (termTimer) termTimer.innerText = "> Cronômetro: Contando...";
+      } else {
+        if (timerDisplayGuest) {
+            timerDisplayGuest.innerText = "00:00";
+            timerDisplayGuest.style.color = "var(--danger)";
+        }
+        if (termTimer) termTimer.innerText = "> Cronômetro: TEMPO ESGOTADO";
+      }
+    } else {
+      // Se o admin pausou ou resetou
+      if (timerDisplayGuest) {
+          timerDisplayGuest.innerText = formatTime(globalTimerTarget);
+          timerDisplayGuest.style.color = "var(--muted)";
+      }
+      if (termTimer) termTimer.innerText = "> Cronômetro: Pausado/Aguardando";
+    }
+  }, 500);
+
+  // Leitura em Tempo Real do Firebase (Apenas Leitura - 100% Protegido)
   onValue(ref(db, 'robotek/'), (snapshot) => {
-    const data = snapshot.val();
-    if (!data) return;
+    const data = snapshot.val() || {};
+    
+    // Trava de segurança para objetos internos
+    const telemetria = data.telemetria || {};
+    const controle = data.controle || {};
 
-    // 1. Atualização dos Valores Numéricos (IDs corrigidos)
-    document.getElementById('live-temp').innerText = data.telemetria.temp_atual + "°C";
-    document.getElementById('live-setpoint').innerText = data.controle.setpoint + "°C";
+    const tempAtual = telemetria.temp_atual || 0;
+    const setpointVal = controle.setpoint || 20;
+    const statusSistema = controle.status_sistema || false;
 
-    // 2. Atualização das Barras de Progresso (Calculado sobre 100°C)
-    document.getElementById('bar-temp').style.width = Math.min(100, data.telemetria.temp_atual) + "%";
-    document.getElementById('bar-setpoint').style.width = Math.min(100, data.controle.setpoint) + "%";
+    // Atualiza Números
+    const elLiveTemp = document.getElementById('live-temp');
+    if (elLiveTemp) elLiveTemp.innerText = tempAtual + "°C";
+    
+    const elLiveSetpoint = document.getElementById('live-setpoint');
+    if (elLiveSetpoint) elLiveSetpoint.innerText = setpointVal + "°C";
 
-    // 3. Atualização do Status e Terminal
+    // Atualiza Barras
+    const elBarTemp = document.getElementById('bar-temp');
+    if (elBarTemp) elBarTemp.style.width = Math.min(100, tempAtual) + "%";
+    
+    const elBarSetpoint = document.getElementById('bar-setpoint');
+    if (elBarSetpoint) elBarSetpoint.style.width = Math.min(100, setpointVal) + "%";
+
+    // Atualiza Status do Sistema
     const statusHeader = document.getElementById('live-status-header');
     const termStatus = document.getElementById('term-sys-status');
     const termPID = document.getElementById('term-pid');
 
-    if (data.controle.status_sistema) {
-      statusHeader.innerHTML = '<span class="pulse-dot"></span> Ao Vivo';
-      statusHeader.style.color = "var(--leaf2)";
-      termStatus.innerHTML = '&gt; Sistema: <span class="tgreen">AQUECIMENTO ATIVO</span>';
-      termPID.innerText = `> PID Target: ${data.controle.setpoint}°C`;
+    if (statusSistema) {
+      if (statusHeader) {
+          statusHeader.innerHTML = '<span class="pulse-dot"></span> Ao Vivo';
+          statusHeader.style.color = "var(--leaf2)";
+      }
+      if (termStatus) termStatus.innerHTML = '&gt; Sistema: <span class="tgreen">AQUECIMENTO ATIVO</span>';
+      if (termPID) termPID.innerText = `> PID Target: ${setpointVal}°C`;
     } else {
-      statusHeader.innerHTML = '<span class="pulse-dot" style="background:var(--danger); animation:none;"></span> Standby';
-      statusHeader.style.color = "var(--muted)";
-      termStatus.innerHTML = '&gt; Sistema: <span style="color:var(--danger)">PAUSADO</span>';
-      termPID.innerText = "> PID: Idle";
+      if (statusHeader) {
+          statusHeader.innerHTML = '<span class="pulse-dot" style="background:var(--danger); animation:none;"></span> Standby';
+          statusHeader.style.color = "var(--muted)";
+      }
+      if (termStatus) termStatus.innerHTML = '&gt; Sistema: <span style="color:var(--danger)">PAUSADO</span>';
+      if (termPID) termPID.innerText = "> PID: Idle";
     }
+
+    // Puxa as variáveis de tempo da nuvem (o setInterval acima encarrega-se da animação)
+    globalTimerRunning = controle.timer_running || false;
+    globalTimerTarget = controle.timer_target || 0;
   });
 </script>
-<script>
-// 3D tilt on beer card
-const card = document.getElementById('beerCard');
-const cardWrap = card.parentElement;
-cardWrap.addEventListener('mousemove', e => {
-  const r = cardWrap.getBoundingClientRect();
-  const x = e.clientX - r.left - r.width/2;
-  const y = e.clientY - r.top  - r.height/2;
-  card.style.transform = `rotateY(${x/r.width*16}deg) rotateX(${-y/r.height*12}deg) translateZ(15px)`;
-});
-cardWrap.addEventListener('mouseleave', () => {
-  card.style.transform = '';
-  card.style.transition = 'transform 0.6s ease';
-  setTimeout(() => card.style.transition = '', 600);
-});
 
-// Scroll reveal
-const obs = new IntersectionObserver(es => {
-  es.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
-}, { threshold: 0.12 });
+<script>
+// UI Scripts: 3D Card, Scroll Reveal, Mobile Menu
+const card = document.getElementById('beerCard');
+if(card) {
+  const cardWrap = card.parentElement;
+  cardWrap.addEventListener('mousemove', e => {
+    const r = cardWrap.getBoundingClientRect();
+    const x = e.clientX - r.left - r.width/2;
+    const y = e.clientY - r.top  - r.height/2;
+    card.style.transform = `rotateY(${x/r.width*16}deg) rotateX(${-y/r.height*12}deg) translateZ(15px)`;
+  });
+  cardWrap.addEventListener('mouseleave', () => {
+    card.style.transform = '';
+    card.style.transition = 'transform 0.6s ease';
+    setTimeout(() => card.style.transition = '', 600);
+  });
+}
+
+const obs = new IntersectionObserver(es => { es.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); }); }, { threshold: 0.12 });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
-// Nav bg
 window.addEventListener('scroll', () => {
   const nav = document.getElementById('navbar');
-  nav.style.background = window.scrollY > 60
-    ? 'rgba(245,239,228,0.98)'
-    : 'rgba(245,239,228,0.92)';
+  if(nav) nav.style.background = window.scrollY > 60 ? 'rgba(245,239,228,0.98)' : 'rgba(245,239,228,0.92)';
 });
 
-// Lógica corrigida do Menu Hambúrguer usando class toggle
 const ham = document.getElementById('ham');
 const navLinks = document.querySelector('.nav-links');
-
-ham.addEventListener('click', () => {
-  navLinks.classList.toggle('active');
-});
-
-document.querySelectorAll('.nav-links a').forEach(a => {
-  a.addEventListener('click', () => {
-    navLinks.classList.remove('active');
-  });
-});
-
-// Sensor bar jitter
-document.querySelectorAll('.bar-fill').forEach(bar => {
-  const base = parseFloat(bar.style.width);
-  setInterval(() => {
-    const v = base + (Math.random() - 0.5) * 14;
-    bar.style.width = Math.max(10, Math.min(96, v)).toFixed(0) + '%';
-    bar.style.transition = 'width 2.5s ease';
-  }, 3200);
-});
-
+if(ham && navLinks) {
+  ham.addEventListener('click', () => { navLinks.classList.toggle('active'); });
+  document.querySelectorAll('.nav-links a').forEach(a => { a.addEventListener('click', () => { navLinks.classList.remove('active'); }); });
+}
 </script>
 </body>
 </html>

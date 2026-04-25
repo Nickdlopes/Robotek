@@ -298,7 +298,7 @@
     </div>
   </div>
 
-<script type="module">
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
@@ -315,11 +315,11 @@
     let hasReachedSetpoint = false; 
 
     // --- NOVA LÓGICA DO CRONÔMETRO (NUVEM / GLOBAL) ---
-    // Em vez de contar localmente, lemos o "Target" do Firebase.
     let globalTimerRunning = false;
     let globalTimerTarget = 0; 
-    let localRemainingMs = 0; // Quantidade de tempo (em milissegundos) que falta
+    let localRemainingMs = 0; 
     let visualUpdateInterval = null;
+    
     const timerDisplay = document.getElementById('timer-display');
     const btnToggle = document.getElementById('btn-timer-toggle');
 
@@ -331,18 +331,52 @@
       return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
     }
 
+   // Variável para evitar disparos duplicados
+    let alertFired = false;
+
+    // Função de Alarme Independente (Web Audio API)
+    function playAlarm() {
+      // Cria o contexto de áudio
+      const context = new (window.AudioContext || window.webkitAudioContext)();
+      
+      // Criamos 5 osciladores agendados no tempo do hardware de áudio
+      // Isso garante que o som toque mesmo se o JS principal estiver travado pelo alert()
+      for (let i = 0; i < 10; i++) {
+        const osc = context.createOscillator();
+        const gain = context.createGain();
+        
+        osc.connect(gain);
+        gain.connect(context.destination);
+        
+        osc.type = "sine";
+        osc.frequency.value = 880; // Lá (A5) - Tom agudo de aviso
+        
+        // Agendamento: i segundos de atraso, toca por 0.5s
+        let startTime = context.currentTime + i;
+        let stopTime = startTime + 0.5;
+        
+        osc.start(startTime);
+        osc.stop(stopTime);
+        
+        // Fade out suave para não estalar no ouvido
+        gain.gain.setValueAtTime(0.5, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, stopTime);
+      }
+    }
+
     function renderTimerVisuals() {
-      // Se não está rodando, calculamos com base no que está guardado
+      if (!timerDisplay || !btnToggle) return;
+
       if (!globalTimerRunning) {
         if (document.activeElement !== timerDisplay) {
-          timerDisplay.innerText = formatTime(globalTimerTarget); // Se pausado, o "Target" atua como um cofre de tempo
+          timerDisplay.innerText = formatTime(globalTimerTarget); 
         }
         timerDisplay.style.color = 'var(--leaf2)';
         timerDisplay.classList.remove('running');
         btnToggle.innerText = '▶';
         timerDisplay.contentEditable = "false";
+        alertFired = false; 
       } else {
-        // Se está rodando, calculamos a diferença entre o Agora e o Alvo no futuro
         let now = Date.now();
         localRemainingMs = globalTimerTarget - now;
         
@@ -353,15 +387,30 @@
           btnToggle.innerText = '⏸';
           timerDisplay.contentEditable = "false";
         } else {
-          // Fim do tempo
+          // --- FIM DE TEMPO (RAMPA CONCLUÍDA) ---
           timerDisplay.innerText = "00:00";
           timerDisplay.style.color = 'var(--danger)';
           timerDisplay.classList.remove('running');
           btnToggle.innerText = '▶';
           
-          // Notifica o Firebase que o timer acabou para sincronizar os ecrãs
           if (globalTimerRunning) {
-             update(ref(db, 'robotek/controle'), { timer_running: false, timer_target: 0 });
+             // 1. Desliga o aquecimento no Firebase imediatamente
+             update(ref(db, 'robotek/controle'), { 
+               timer_running: false, 
+               timer_target: 0, 
+               status_sistema: false 
+             });
+             
+             // 2. Dispara som e alerta simultaneamente
+             if (!alertFired) {
+                alertFired = true;
+                playAlarm(); // Inicia o ciclo de 5 segundos de áudio
+                
+                // O alert vem logo em seguida
+                setTimeout(() => {
+                  alert("🚨 Tempo esgotado! O sistema foi desligado. 🚨");
+                }, 50);
+             }
           }
         }
       }
@@ -371,23 +420,17 @@
     if (!visualUpdateInterval) {
       visualUpdateInterval = setInterval(() => {
         if (globalTimerRunning) renderTimerVisuals();
-      }, 500); // Atualiza a cada meio segundo para não "pular" números
+      }, 500); 
     }
 
     // --- FUNÇÕES DE ESCRITA NO FIREBASE (AÇÕES DO USUÁRIO) ---
-    
-    // Iniciar ou Pausar envia o comando para a nuvem
     window.toggleTimerFirebase = () => {
-      if (globalTimerTarget === 0 && !globalTimerRunning) return; // Não inicia zerado
+      if (globalTimerTarget === 0 && !globalTimerRunning) return; 
 
       if (!globalTimerRunning) {
-        // Estava pausado. Vamos iniciar!
-        // Criamos um novo alvo no futuro: Agora + Tempo que estava guardado
         let newTarget = Date.now() + globalTimerTarget;
         update(ref(db, 'robotek/controle'), { timer_running: true, timer_target: newTarget });
       } else {
-        // Estava rodando. Vamos pausar!
-        // Guardamos o que sobrou de volta no Target para funcionar como "cofre"
         let timeLeft = globalTimerTarget - Date.now();
         if (timeLeft < 0) timeLeft = 0;
         update(ref(db, 'robotek/controle'), { timer_running: false, timer_target: timeLeft });
@@ -396,14 +439,11 @@
 
     window.adjustTimerFirebase = (msToAddOrRemove) => {
       if (!globalTimerRunning) {
-        // Se pausado, ajusta diretamente o valor guardado
         let novoTempo = globalTimerTarget + msToAddOrRemove;
         if (novoTempo < 0) novoTempo = 0;
         update(ref(db, 'robotek/controle'), { timer_target: novoTempo });
       } else {
-        // Se rodando, empurra o Alvo mais para o futuro ou puxa para o presente
         let novoTarget = globalTimerTarget + msToAddOrRemove;
-        // Não deixa empurrar para o passado a ponto de ficar negativo em relação ao momento atual
         if (novoTarget < Date.now()) novoTarget = Date.now();
         update(ref(db, 'robotek/controle'), { timer_target: novoTarget });
       }
@@ -467,7 +507,6 @@
         let totalMs = ((m * 60) + s) * 1000;
         
         hasReachedSetpoint = false; 
-        // Salva a edição na nuvem
         update(ref(db, 'robotek/controle'), { timer_target: totalMs });
       }
     });
@@ -513,33 +552,39 @@
     window.zoomChartOut = () => { tempChart.zoom(0.9); };
     window.resetChartZoom = () => { tempChart.resetZoom(); };
 
-    // --- LEITURA DO FIREBASE (TEMPO REAL) ---
+    // --- LEITURA DO FIREBASE (TEMPO REAL) COM PROTEÇÃO ---
     onValue(ref(db, 'robotek/'), (snapshot) => {
       const data = snapshot.val();
-      if (!data) return;
+      if (!data) return; // Se o DB estiver completamente vazio, apenas aguarda.
 
-      document.getElementById('temp-atual').innerText = data.telemetria.temp_atual;
-      document.getElementById('setpoint-val').innerText = data.controle.setpoint;
-      document.getElementById('setpoint-range').value = data.controle.setpoint;
+      // TRAVA DE SEGURANÇA: Garante que os objetos existem antes de tentar ler
+      const telemetria = data.telemetria || {};
+      const controle = data.controle || {};
 
-      systemIsOn = data.controle.status_sistema;
+      const tempAtual = telemetria.temp_atual || 0;
+      const setpointVal = controle.setpoint || 20;
+
+      document.getElementById('temp-atual').innerText = tempAtual;
+      document.getElementById('setpoint-val').innerText = setpointVal;
+      document.getElementById('setpoint-range').value = setpointVal;
+
+      systemIsOn = controle.status_sistema || false;
       const statusBtn = document.getElementById('status-btn');
       statusBtn.innerText = systemIsOn ? "SISTEMA ON" : "SISTEMA OFF";
       statusBtn.className = systemIsOn ? "badge-on" : "badge-off";
 
-      // Sincronização do Estado do Cronômetro vindo da Nuvem
-      globalTimerRunning = data.controle.timer_running || false;
-      globalTimerTarget = data.controle.timer_target || 0;
+      // Sincronização do Estado do Cronômetro
+      globalTimerRunning = controle.timer_running || false;
+      globalTimerTarget = controle.timer_target || 0;
       
-      // Força a atualização visual imediatamente após ler do Firebase
       if (!globalTimerRunning) renderTimerVisuals();
 
-      // Gatilho Automático (Administrador é o responsável por disparar para a nuvem)
+      // Gatilho Automático (Administrador dispara o timer)
       if (systemIsOn && globalTimerTarget > 0 && !globalTimerRunning) {
-        if (Math.abs(data.telemetria.temp_atual - data.controle.setpoint) <= 5) {
+        if (Math.abs(tempAtual - setpointVal) <= 5) {
           if (!hasReachedSetpoint) {
             hasReachedSetpoint = true; 
-            window.toggleTimerFirebase(); // O admin manda o comando "Play" para a nuvem
+            window.toggleTimerFirebase(); 
           }
         }
       }
@@ -548,8 +593,8 @@
       // Gráfico
       const time = new Date().toLocaleTimeString();
       tempChart.data.labels.push(time);
-      tempChart.data.datasets[0].data.push(data.telemetria.temp_atual);
-      tempChart.data.datasets[1].data.push(data.controle.setpoint);
+      tempChart.data.datasets[0].data.push(tempAtual);
+      tempChart.data.datasets[1].data.push(setpointVal);
       
       if (tempChart.data.labels.length > 100) {
         tempChart.data.labels.shift();
@@ -565,7 +610,9 @@
       const v = parseFloat(document.getElementById('setpoint-range').value) + delta;
       update(ref(db, 'robotek/controle'), { setpoint: Math.max(20, Math.min(95, v)) });
     };
-    window.emergencyStop = () => { update(ref(db, 'robotek/controle'), { status_sistema: false }); };
+    window.emergencyStop = () => { 
+      update(ref(db, 'robotek/controle'), { status_sistema: false, timer_running: false }); 
+    };
 
   </script>
 </body>
