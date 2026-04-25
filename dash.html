@@ -302,6 +302,11 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+    // Verificação de segurança no topo do dash.html
+    if (sessionStorage.getItem('robotek_auth') !== 'true') {
+      window.location.href = 'login.html';
+    }
+
     const firebaseConfig = {
       apiKey: "AIzaSyAfgkNc7LNpmyJTFD9q1LeuiIqThMhCq1k",
       databaseURL: "https://robotek-senac-default-rtdb.firebaseio.com",
