@@ -735,29 +735,58 @@ footer {
 .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:4px; }
 .hamburger span { display:block; width:22px; height:1px; background:var(--moss); transition:all 0.3s; }
 
-/* Responsive */
+/* -------------------------------------------
+   MELHORIAS DE RESPONSIVIDADE
+------------------------------------------- */
 @media (max-width: 991px) {
   #hero { grid-template-columns: 1fr; }
-  .hero-right { height: 60vw; min-height: 360px; }
-  .hero-left { padding: 5rem 1.5rem 3rem; }
+  /* Removemos a altura fixa (vw) para evitar que o cartão seja cortado */
+  .hero-right { height: auto; min-height: 500px; padding: 4rem 1.5rem; }
+  .hero-left { padding: 7rem 1.5rem 4rem; }
+  
   .chip-float { display: none; }
   .about-wrap { grid-template-columns: 1fr; gap: 3rem; }
-  #about, #project { padding: 5rem 1.5rem; }
+  #about, #project { padding: 4rem 1.5rem; }
+  
   nav { padding: 1rem 1.5rem; }
-  .nav-links, .nav-btn { display: none; }
+  .nav-btn { display: none; }
   .hamburger { display: flex; }
-  footer { padding: 1.5rem; }
+  
+  /* Lógica CSS limpa para o menu mobile, substituindo a injeção via JS */
+  .nav-links { 
+    display: none; 
+    flex-direction: column; 
+    position: fixed; 
+    top: 65px; left: 0; right: 0; 
+    background: rgba(245,239,228,0.98); 
+    padding: 2rem 1.5rem; 
+    gap: 1.5rem; 
+    border-bottom: 1px solid var(--border); 
+    z-index: 999; 
+  }
+  .nav-links.active { display: flex; }
+  
+  footer { flex-direction: column; text-align: center; gap: 1.5rem; }
 }
+
 @media (max-width: 576px) {
-  .hero-right { height: 80vw; }
-  .beer-hero-card { width: 260px; }
+  /* Ajuste de fontes para evitar quebra de layout em telas muito estreitas */
+  .hero-title { font-size: clamp(2.5rem, 10vw, 3.2rem); }
+  .beer-label-name { font-size: 2.2rem; }
+  
+  /* Permite que o cartão ocupe a largura disponível, mantendo um limite agradável */
+  .beer-hero-card { width: 100%; max-width: 300px; }
+  
   .project-features { grid-template-columns: 1fr; }
+  
+  /* Botões empilhados para melhor área de toque (UX) no celular */
+  .hero-cta-group { flex-direction: column; align-items: stretch; }
+  .btn-filled, .btn-ghost { text-align: center; }
 }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav id="navbar">
   <a class="nav-logo" href="#hero">
     <span class="logo-dot"></span>
@@ -772,11 +801,9 @@ footer {
   <div class="hamburger" id="ham"><span></span><span></span><span></span></div>
 </nav>
 
-<!-- HERO -->
 <section id="hero">
   <div class="hero-bg-pattern"></div>
 
-  <!-- LEFT -->
   <div class="hero-left">
     <div class="hero-eyebrow">
       <div class="eyebrow-line"></div>
@@ -798,17 +825,9 @@ footer {
     </div>
   </div>
 
-  <!-- RIGHT — beer hero -->
   <div class="hero-right">
     <div class="hero-right-bg"></div>
     <div class="hero-right-grid"></div>
-
-    <!-- Floating chips -->
-    <div class="chip-float chip1"><span class="pulse-dot" style="display:inline-block;width:4px;height:4px;background:#7AAB5E;border-radius:50%;margin-right:5px;animation:breathe 2s infinite;"></span>Temp: 18.4°C</div>
-    <div class="chip-float chip2">pH: 4.2 · Estável</div>
-    <div class="chip-float chip3">Lote #007 · Ativo</div>
-
-    <!-- PLACEHOLDER: imagem do rótulo / garrafa da cerveja -->
     <div class="img-placeholder img-placeholder-dark" style="position:absolute;top:1.5rem;right:1.5rem;width:90px;height:90px;border-radius:50%;z-index:3;" title="Substituir pela logo ou foto do rótulo">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7AAB5E" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="4"/><line x1="3" y1="3" x2="8" y2="8"/><line x1="21" y1="3" x2="16" y2="8"/></svg>
       <span style="font-size:0.42rem;text-align:center;line-height:1.4;">Logo /<br>Rótulo</span>
@@ -859,7 +878,6 @@ footer {
   </div>
 </section>
 
-<!-- ABOUT -->
 <section id="about">
   <div class="about-wrap">
     <div class="about-body reveal">
@@ -881,7 +899,6 @@ footer {
     </div>
 
     <div class="reveal reveal-d2">
-      <!-- PLACEHOLDER: foto da fábrica / equipamentos ESP32 -->
       <div class="img-placeholder" style="width:100%;height:220px;margin-bottom:1.5rem;border-radius:4px;" title="Substituir pela foto da fábrica ou do hardware ESP32">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3A5A2E" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="4"/><line x1="3" y1="3" x2="8" y2="8"/><line x1="21" y1="3" x2="16" y2="8"/></svg>
         <span>Foto · Fábrica / ESP32</span>
@@ -933,7 +950,6 @@ footer {
   </div>
 </section>
 
-<!-- PROJECT CTA -->
 <section id="project">
   <div class="project-bg-lines"></div>
   <div class="project-inner">
@@ -968,8 +984,7 @@ footer {
         <div class="pfeature-desc">Discord e GitHub para troca de receitas, código e experiências.</div>
       </div>
     </div>
-    <!-- PLACEHOLDERS: galeria de fotos do processo / produto -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2.5rem;" class="reveal reveal-d2">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2.5rem;" class="reveal reveal-d2">
       <div class="img-placeholder img-placeholder-dark" style="height:150px;border-radius:4px;" title="Substituir pela foto do processo de fabricação">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7AAB5E" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="4"/><line x1="3" y1="3" x2="8" y2="8"/><line x1="21" y1="3" x2="16" y2="8"/></svg>
         <span>Foto · Processo</span>
@@ -986,7 +1001,6 @@ footer {
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
   <div class="footer-logo">
     <span class="logo-dot" style="width:6px;height:6px;"></span>
@@ -1026,19 +1040,19 @@ window.addEventListener('scroll', () => {
     : 'rgba(245,239,228,0.92)';
 });
 
-// Hamburger
-document.getElementById('ham').addEventListener('click', () => {
-  const links = document.querySelector('.nav-links');
-  const isOpen = links.style.display === 'flex';
-  if (!isOpen) {
-    links.style.cssText = 'display:flex;flex-direction:column;position:fixed;top:65px;left:0;right:0;background:rgba(245,239,228,0.98);padding:2rem 1.5rem;gap:1.5rem;border-bottom:1px solid rgba(58,90,46,0.18);z-index:999;';
-  } else {
-    links.style.display = 'none';
-  }
+// Lógica corrigida do Menu Hambúrguer usando class toggle
+const ham = document.getElementById('ham');
+const navLinks = document.querySelector('.nav-links');
+
+ham.addEventListener('click', () => {
+  navLinks.classList.toggle('active');
 });
-document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => {
-  document.querySelector('.nav-links').style.display = 'none';
-}));
+
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => {
+    navLinks.classList.remove('active');
+  });
+});
 
 // Sensor bar jitter
 document.querySelectorAll('.bar-fill').forEach(bar => {
