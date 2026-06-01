@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robotek — Cadastro</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --moss: #3A5A2E; --leaf: #7AAB5E; --leaf2: #A8C88C; --cream: #F5EFE4; --ink: #1A1F14; --ink2: #2C3422; }
+    body { font-family: 'Syne', sans-serif; background: var(--ink); color: var(--cream); height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
+    .card { background: var(--ink2); padding: 3rem; border-radius: 4px; border: 1px solid rgba(122,171,94,0.2); width: 100%; max-width: 380px; }
+    .header { font-size: 1.2rem; font-weight: 800; color: var(--leaf2); text-align: center; margin-bottom: 2rem; }
+    label { display: block; font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--leaf); margin-bottom: 0.5rem; }
+    input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(122,171,94,0.2); padding: 0.8rem; color: var(--cream); margin-bottom: 1.2rem; box-sizing: border-box; }
+    .btn-reg { width: 100%; padding: 1rem; background: var(--moss); color: var(--cream); border: none; cursor: pointer; font-family: 'DM Mono', monospace; font-weight: bold; }
+    .btn-reg:hover { background: var(--leaf); }
+    .footer-link { display: block; text-align: center; margin-top: 1.5rem; font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--leaf2); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">REGISTRAR OPERADOR</div>
+    <form id="regForm">
+      <label>E-mail Corporativo</label>
+      <input type="email" id="email" required>
+      <label>Definir Senha (min. 6 caracteres)</label>
+      <input type="password" id="password" required minlength="6">
+      <button type="submit" class="btn-reg" id="btnReg">CRIAR CONTA</button>
+      <a href="login.html" class="footer-link">Já tem uma conta? Entrar</a>
+    </form>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAfgkNc7LNpmyJTFD9q1LeuiIqThMhCq1k",
+        authDomain: "robotek-senac.firebaseapp.com",
+        databaseURL: "https://robotek-senac-default-rtdb.firebaseio.com",
+        projectId: "robotek-senac",
+        storageBucket: "robotek-senac.firebasestorage.app",
+        messagingSenderId: "1035788630207",
+        appId: "1:1035788630207:web:f89f12b089be4c7cc1ee0a"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    document.getElementById('regForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      const btn = document.getElementById('btnReg');
+
+      btn.innerText = "CRIANDO...";
+      btn.disabled = true;
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+        await setDoc(doc(db, "usuarios", userCredential.user.uid), {
+          email: email,
+          role: "operador",
+          statusAprovacao: "pendente",
+          createdAt: new Date()
+        });
+        alert("Cadastro recebido! O acesso será liberado após a aprovação manual de um administrador.");
+        window.location.href = 'login.html';
+      } catch (error) {
+        alert("Erro no cadastro: " + error.message);
+        btn.innerText = "CRIAR CONTA";
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

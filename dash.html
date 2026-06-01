@@ -273,7 +273,7 @@
 
   <div class="chart-container">
     <div class="chart-header">
-      <div class="chart-title">Telemetria em Tempo Real</div>
+      <div class="chart-title">Telemetria</div>
       <div class="chart-controls">
         <button class="btn-adjust reset-btn" onclick="resetChartZoom()">Reset</button>
         <button class="btn-adjust" onclick="zoomChartOut()">-</button>
@@ -287,11 +287,8 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    if (sessionStorage.getItem('robotek_auth') !== 'true') {
-      window.location.href = 'login.html';
-    }
 
     const firebaseConfig = {
       apiKey: "AIzaSyAfgkNc7LNpmyJTFD9q1LeuiIqThMhCq1k",
@@ -302,7 +299,17 @@
     const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwc1RY0MJYVqsN5xO4NATDH4zF4zwO_Xj_EWA8arTmnJTBZsR54aGp_9PPIihXVXdzhOQ/exec";
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getDatabase(app);
+
+    // Nova verificação de autenticação do Firebase
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+      } else {
+        console.log("Operador autenticado no painel:", user.email);
+      }
+    });
 
     let systemIsOn = false, lastUpdateTimestamp = 0, espConnected = false, globalTimerRunning = false, globalTimerTarget = 0; 
     const timerDisplay = document.getElementById('timer-display'), btnToggle = document.getElementById('btn-timer-toggle');
