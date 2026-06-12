@@ -287,6 +287,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
@@ -298,7 +299,13 @@
     const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwc1RY0MJYVqsN5xO4NATDH4zF4zwO_Xj_EWA8arTmnJTBZsR54aGp_9PPIihXVXdzhOQ/exec";
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getDatabase(app);
+
+    // Substitui o redirecionamento pelo login anônimo
+    signInAnonymously(auth).catch((error) => {
+      console.error("Erro no login anônimo automático:", error);
+    });
 
     let systemIsOn = false, lastUpdateTimestamp = 0, espConnected = false, globalTimerRunning = false, globalTimerTarget = 0; 
     const timerDisplay = document.getElementById('timer-display'), btnToggle = document.getElementById('btn-timer-toggle');
