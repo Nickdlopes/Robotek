@@ -213,7 +213,7 @@
       border-radius: 2px;
       border: 1px solid rgba(122,171,94,0.2);
       position: relative;
-      height: 380px; 
+      height: 480px; /* ALTURA AUMENTADA AQUI */
       display: flex;
       flex-direction: column;
     }
@@ -473,7 +473,6 @@
       }, 500); 
     }
 
-    // --- LÓGICA GOOGLE SHEETS: HISTÓRICO COMPLETO ---
     const sheetId = '1we4gmrFL36z9yvANcGpXFK_owxuDLn_c6gs0isR7uvg';
     const sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&gid=0`;
 
@@ -483,7 +482,6 @@
         const text = await response.text();
         const rows = text.trim().split('\n').map(row => row.split(','));
         
-        // Ignora a primeira linha se for cabeçalho (ex: contém "HORA") e linhas vazias
         const validRows = rows.filter(r => r.length >= 3 && r[0] !== "" && !r[0].includes("HORA"));
         
         if (validRows.length > 0) { 
@@ -504,18 +502,15 @@
           });
 
           if (novasLabels.length > 0) {
-            // Atualiza as variáveis globais com a ÚLTIMA linha (Tempo Presente)
             tempAtualGlobal = novaTempReal[novaTempReal.length - 1];
             setpointGlobal = novoSetpoint[novoSetpoint.length - 1];
 
             document.getElementById('temp-atual').innerText = tempAtualGlobal;
             document.getElementById('setpoint-val').innerText = setpointGlobal;
-            // Se o usuário não estiver mexendo, atualizamos o range
             if(document.activeElement !== document.getElementById('setpoint-range')) {
                document.getElementById('setpoint-range').value = setpointGlobal;
             }
 
-            // Substitui os arrays do gráfico pelo histórico completo
             tempChart.data.labels = novasLabels;
             tempChart.data.datasets[0].data = novaTempReal;
             tempChart.data.datasets[1].data = novoSetpoint;
@@ -528,11 +523,9 @@
       }
     }
 
-    // Continua checando a planilha a cada 5 segundos para caso novas linhas entrem
     setInterval(fetchSheetData, 5000);
     fetchSheetData();
 
-    // --- AÇÕES DO FIREBASE ---
     window.toggleTimerFirebase = () => {
       if (!isEspConnected || (globalTimerTarget === 0 && !globalTimerRunning)) return; 
       if (!globalTimerRunning) {
@@ -614,7 +607,6 @@
 
     timerDisplay.addEventListener('paste', (e) => e.preventDefault());
 
-    // --- CONFIGURAÇÃO DO GRÁFICO ---
     const ctx = document.getElementById('tempChart').getContext('2d');
     Chart.defaults.color = 'rgba(196,168,130,0.5)';
     Chart.defaults.font.family = "'DM Mono', monospace";
@@ -636,7 +628,8 @@
           zoom: { pan: { enabled: true, mode: 'x' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' } }
         },
         scales: { 
-          y: { min: 20, max: 100, grid: { color: 'rgba(122,171,94,0.05)' } },
+          /* LIMITE DO EIXO Y AUMENTADO AQUI DE 100 PARA 110 */
+          y: { min: 20, max: 110, grid: { color: 'rgba(122,171,94,0.05)' } },
           x: { grid: { color: 'rgba(122,171,94,0.05)' }, ticks: { maxTicksLimit: 15 } }
         } 
       }
@@ -646,7 +639,6 @@
     window.zoomChartOut = () => { tempChart.zoom(0.9); };
     window.resetChartZoom = () => { tempChart.resetZoom(); };
 
-    // --- LISTENER DO FIREBASE ---
     onValue(ref(db, 'robotek/'), (snapshot) => {
       const data = snapshot.val();
       
