@@ -213,7 +213,7 @@
       border-radius: 2px;
       border: 1px solid rgba(122,171,94,0.2);
       position: relative;
-      height: 500px;
+      height: 480px; 
       display: flex;
       flex-direction: column;
     }
@@ -607,6 +607,30 @@
 
     timerDisplay.addEventListener('paste', (e) => e.preventDefault());
 
+    // --- NOVO PLUGIN: LINHA VERTICAL NO HOVER ---
+    const verticalHoverLine = {
+      id: 'verticalHoverLine',
+      beforeDraw: chart => {
+        if (chart.tooltip._active && chart.tooltip._active.length) {
+          const ctx = chart.ctx;
+          const activePoint = chart.tooltip._active[0];
+          const x = activePoint.element.x;
+          const topY = chart.scales.y.top;
+          const bottomY = chart.scales.y.bottom;
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(x, topY);
+          ctx.lineTo(x, bottomY);
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = 'rgba(122, 171, 94, 0.4)'; // Verde suave transparente
+          ctx.setLineDash([5, 5]);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    };
+
     const ctx = document.getElementById('tempChart').getContext('2d');
     Chart.defaults.color = 'rgba(196,168,130,0.5)';
     Chart.defaults.font.family = "'DM Mono', monospace";
@@ -628,11 +652,11 @@
           zoom: { pan: { enabled: true, mode: 'x' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' } }
         },
         scales: { 
-          /* LIMITE DO EIXO Y AUMENTADO AQUI DE 100 PARA 110 */
-          y: { min: 20, max: 150, grid: { color: 'rgba(122,171,94,0.05)' } },
+          y: { min: 20, max: 110, grid: { color: 'rgba(122,171,94,0.05)' } },
           x: { grid: { color: 'rgba(122,171,94,0.05)' }, ticks: { maxTicksLimit: 15 } }
         } 
-      }
+      },
+      plugins: [verticalHoverLine] // <-- Plugin adicionado aqui
     });
 
     window.zoomChartIn = () => { tempChart.zoom(1.1); };
